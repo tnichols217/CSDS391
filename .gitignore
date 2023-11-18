@@ -2,3 +2,4 @@ node_modules
 out
 result
 .direnv
+__pycache__
