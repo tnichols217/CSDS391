@@ -41,6 +41,7 @@ class AStar:
             ]
 
     class Heuristics:
+        # TODO: redo for the 2x2x2 rubik's
         """Heuristics for the A-Star search tree"""
         @staticmethod
         def h0(a: Board, goal: Board):

@@ -26,6 +26,7 @@
                     pip
                     jupyter
                     black
+                    numpy
                   ])
                 )
               ];

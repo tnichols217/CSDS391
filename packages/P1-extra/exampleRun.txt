@@ -1,0 +1,7 @@
+setState 120345678
+solve A-star h2
+printState
+randomizeState 1000
+printState
+solve A-star h2
+printState
