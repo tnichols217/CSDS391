@@ -27,6 +27,9 @@
                     jupyter
                     black
                     numpy
+                    matplotlib
+                    scipy
+                    pygobject3
                   ])
                 )
               ];

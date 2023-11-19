@@ -1,12 +1,29 @@
 import math
 import numpy as np
 
+class HistoricalData:
+    def __init__(self, error, subsets, means):
+        self.iterations = 0
+        self.error = [error]
+        self.subsets = [subsets]
+        self.means = [means]
+
+    def add(self, error, subsets, means):
+        self.iterations += 1
+        self.error.append(error)
+        self.subsets.append(subsets)
+        self.means.append(means)
+
+
 class kMeans:
     def __init__(self, data, k=2):
         self.k = k
         self.data = np.array(data)
-        self.dimentions = self.data.shape[1]
-        self.means = []
+
+        self.generateSubsets()
+        self.updateMeans()
+
+        self.hist = HistoricalData(self.getObjective(), self.subsets, self.means)
 
     def generateSubsets(self):
         self.samples = self.data.shape[0]
@@ -30,7 +47,17 @@ class kMeans:
         ]
 
     def updateMeans(self):
-        self.means = [np.mean(i, axis=0) for i in self.subsets]
+        self.means = np.array([np.mean(i, axis=0) for i in self.subsets])
 
-    def getObjective(self):
+    def getObjective(self) -> float:
         return np.sum([self.closestMean(i)[1] ** 2 for i in self.data])
+
+    def step(self):
+        self.updateSubsets()
+        self.updateMeans()
+        self.hist.add(self.getObjective(), self.subsets, self.means)
+        return abs(self.hist.error[-1] - self.hist.error[-2])
+
+    def iterate(self, DELTA):
+        while self.step() > DELTA:
+            pass
