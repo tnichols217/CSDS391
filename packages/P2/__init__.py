@@ -19,6 +19,6 @@ with open("./irisdata.csv") as f:
 
 models = [kMeans.kMeans(data, k=k) for k in K]
 [m.iterate(DELTA) for m in models]
-ps = [plotter.plot(model.hist, DIMS[0], DIMS[1]) for model in models]
+ps = [plotter.Plotter.plot(model.hist, DIMS[0], DIMS[1]) for model in models]
 
 plotter.show()
