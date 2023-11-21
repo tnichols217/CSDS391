@@ -33,7 +33,8 @@ class Solver:
                     continue
                 self.applySegment(self.points[i], self.points[j])
 
-            self.plot.fill(self.polygon.transpose()[0], self.polygon.transpose()[1], edgecolor='black')
+            if len(self.polygon) > 0:
+                self.plot.fill(self.polygon.transpose()[0], self.polygon.transpose()[1], edgecolor='black')
         
 
     def initPolygon(self):

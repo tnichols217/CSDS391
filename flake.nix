@@ -32,6 +32,7 @@
                     pygobject3
                   ])
                 )
+                nodePackages.nodemon
               ];
             };
 

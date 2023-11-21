@@ -45,6 +45,7 @@ class kMeans:
             for i
             in range(self.k)
         ]
+        self.subsets = [s for s in self.subsets if len(s) > 0]
 
     def updateMeans(self):
         self.means = np.array([np.mean(i, axis=0) for i in self.subsets])
