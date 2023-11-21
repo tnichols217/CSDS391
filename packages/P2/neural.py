@@ -12,7 +12,7 @@ class Neural:
 
     @staticmethod
     def calculateLayer(i: np.ndarray, w: np.ndarray, b: np.ndarray, f = Activations.sigmoid):
-        return f((w @ i.transpose()).transpose() + b)
+        return f((w.transpose() @ i) + b)
 
     @staticmethod
     def calculateOutput(i: np.ndarray, w, b, f):
@@ -42,7 +42,20 @@ class Neural:
             in mg.reshape((-1,2))
         ])
 
-        calc = Neural.calculateOutput(mg, w, b, f)
+        calc = Neural.calculateOutput(mg.transpose(), w, b, f)
         transformed = calc.reshape((q, q)).transpose()
 
         return transformed, omg
+
+    @staticmethod
+    def MSE(predicted, truth):
+        return np.mean(np.square(predicted - truth))
+
+    @staticmethod
+    def sigmoidGradient(input, predicted, truth):
+        o = 2 * (predicted - truth) * predicted * (1 - predicted)
+        return (-o * input, -np.mean(o))
+
+    class LinearSigmoid:
+        def __init__(self, data, truth):
+            pass

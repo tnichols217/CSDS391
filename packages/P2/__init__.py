@@ -10,6 +10,7 @@ DELTA = 0.02
 K = range(2, 4)
 DIMS = [2, 3]
 CLASSFILTER = [1, 2]
+EPSILON = 0.1
 
 classes = []
 data = []
@@ -24,10 +25,13 @@ with open("./irisdata.csv") as f:
     data = np.array([[float(j) for k, j in enumerate(i) if k != len(i)-1] for i in rawData])
     classes = np.array([i[-1] for i in rawData])
 
+# Q1
+
 models = [kMeans.kMeans(data, k=k) for k in K]
 [m.iterate(DELTA) for m in models]
 ps = [plotter.Plotter.plotKmeans(model.hist, DIMS[0], DIMS[1]) for model in models]
 
+# Q2
 
 i = np.array([
     [
@@ -51,36 +55,83 @@ w = np.array([
         8.12,
         7.15
     ]
-])
+]).transpose()
+
+w2 = np.array([
+    [
+        0,
+        0,
+        2.23,
+        -3.57
+    ]
+]).transpose()
+
+w3 = np.array([
+    [
+        random.uniform(-2, 2),
+        random.uniform(-2, 2),
+        random.uniform(-2, 2),
+        random.uniform(-2, 2)
+    ]
+]).transpose()
 
 b = np.array([
-    -50
+    -50.0
 ])
 
-# print(neural.Neural.calculateLayer(i, w, b, neural.Neural.Activations.sigmoid))
-# print(neural.Neural.makeLinspace(w, b, [0,0,0,0], [0,5], [0,5]))
+b2 = np.array([
+    -5.4
+])
 
-# plotter.Plotter.plotWB(data, classes, lambda mean, xlim, ylim: neural.Neural.makeLinspace([w], [b], mean, xlim, ylim))
+b3 = np.array([
+    random.uniform(-1, 1)
+])
 
 filteredClasses = np.array([np.unique(classes)[i] for i in CLASSFILTER])
 filter = np.array([i in filteredClasses for i in classes])
 filteredData = data[filter]
 filteredRawData = rawData[filter]
 filteredClassData = classes[filter]
+filteredTruth = filteredRawData.transpose()[4] == "virginica"
+# iterations = 100000
+iterations = 1000
+threshold = 0.025
 
-# print(len(filteredData))
+W = [w, w2, w3]
+B = [b, b2, b3]
+OD = [neural.Neural.calculateOutput(filteredData.transpose(), [(W[i])], [B[i]], neural.Neural.Activations.sigmoid) for i in range(len(W))]
 
-LT = plotter.Plotter.plotLinearTune(filteredData, filteredClassData, neural.Neural.makeLinspace, w, b, x=DIMS[0], y=DIMS[1])
+WS = [[] for i in range(len(W))]
+BS = [[] for i in range(len(B))]
+MSE = [[] for i in range(len(OD))]
 
-result = neural.Neural.calculateOutput(filteredData, [w], [b], neural.Neural.Activations.sigmoid) > 0.5
-# print(result)
-result = np.where(result > 0.5, "virginica", "versicolor")
-merged = np.array([[*i, *j] for i, j in zip(filteredRawData, result)])
+oWS = []
+oBS = []
+oMSE = []
 
-print(merged)
+while len(W) > 0:
+# for i in range(iterations):
+    [WS[i].append(W[i]) for i in range(len(W))]
+    [BS[i].append(B[i]) for i in range(len(B))]
+    [MSE[i].append(neural.Neural.MSE(OD[i], filteredTruth)) for i in range(len(OD))]
 
-print(np.sum(filteredRawData.transpose()[4]==result.transpose()))
-print(len(result))
+    grads = [neural.Neural.sigmoidGradient(filteredData.transpose(), OD[i], filteredTruth) for i in range(len(OD))]
+    W = [w + EPSILON * np.array([np.mean(grads[i][0], axis=1)]).transpose() for i, w in enumerate(W)]
+    B = [b + EPSILON * grads[i][1] for i, b in enumerate(B)]
 
+    print([i[-1] for i in MSE])
+
+    for i in range(len(MSE)-1, -1, -1):
+        if MSE[i][-1] < threshold:
+            W.pop(i)
+            B.pop(i)
+            OD.pop(i)
+            oWS.append(WS.pop(i))
+            oBS.append(BS.pop(i))
+            oMSE.append(MSE.pop(i))
+
+    OD = [neural.Neural.calculateOutput(filteredData.transpose(), [(W[i])], [B[i]], neural.Neural.Activations.sigmoid) for i in range(len(W))]
+
+LT = [plotter.Plotter.plotLinearTime(filteredData, filteredClassData, neural.Neural.makeLinspace, oWS[i], oBS[i], oMSE[i], x=DIMS[0], y=DIMS[1]) for i in range(len(oMSE))]
 
 plotter.Plotter.show()

@@ -22,7 +22,7 @@ class NeuralVisualizer:
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
         mean = np.average(set, axis=0)
-        ls, _ = linspace(w, b, mean, xlim, ylim)
+        ls, _ = linspace(np.array(w), b, mean, xlim, ylim)
         ls = ls.transpose()
         ls = [ls[len(ls)-i-1] for i in range(len(ls))]
         ax.imshow(ls, extent=(xlim[0], xlim[1], ylim[0], ylim[1]))
@@ -30,7 +30,7 @@ class NeuralVisualizer:
 
     def drawPlots3D(ax, x, y, w, b, sets):
         return [
-            ax.scatter(set.transpose()[x], set.transpose()[y], neural.Neural.calculateOutput(set, w, b, neural.Neural.Activations.sigmoid))
+            ax.scatter(set.transpose()[x], set.transpose()[y], neural.Neural.calculateOutput(set.transpose(), np.array(w), b, neural.Neural.Activations.sigmoid))
             for i, set
             in enumerate(sets)
         ]
@@ -42,7 +42,7 @@ class NeuralVisualizer:
         xlim = ax.get_xlim()
         ylim = ax.get_ylim()
         mean = np.average(set, axis=0)
-        ls, [X, Y] = linspace(w, b, mean, xlim, ylim)
+        ls, [X, Y] = linspace(np.array(w), b, mean, xlim, ylim)
         ax.plot_surface(X, Y, ls)
 
 class Plotter:
@@ -67,6 +67,38 @@ class Plotter:
             Plotter.plot(functions=[[drawPlots3D, showTopology]], threed=True)]
 
     @staticmethod
+    def plotLinearTime(set: np.ndarray, classes: np.ndarray, linspace, w, b, e, x=2, y=3):
+        uclasses = np.unique(classes)
+        sets = [set[classes == uclasses[i]] for i in range(len(uclasses))]
+        def drawPlots(_, ax):
+            return NeuralVisualizer.drawPlots(ax, x, y, sets)
+
+        def showHeatMap(t, ax):
+            return NeuralVisualizer.showHeatMap(ax, linspace, set, np.array(w[t[0]]).transpose(), b[t[0]])
+
+        def drawPlots3D(t, ax):
+            return NeuralVisualizer.drawPlots3D(ax, x, y, np.array(w[t[0]]).transpose(), b[t[0]], sets)
+
+        def showTopology(t, ax):
+            return NeuralVisualizer.showTopology(ax, x, y, set, np.array(w[t[0]]).transpose(), b[t[0]], linspace)
+
+        def showMSE(t, ax):
+            return ax.plot(e)
+
+        sliders = [
+            {
+                "label": 't',
+                "valmin": 0,
+                "valmax": len(w)-1,
+                "valinit": len(w)-1,
+                "valstep": 1
+            }
+        ]
+
+        return [Plotter.plot(functions=[[drawPlots,showHeatMap], [showMSE]], s=sliders),
+            Plotter.plot(functions=[[drawPlots3D, showTopology]], s=sliders, threed=True)]
+
+    @staticmethod
     def plotLinearTune(set: np.ndarray, classes: np.ndarray, linspace, w, b, x=2, y=3):
         uclasses = np.unique(classes)
         sets = [set[classes == uclasses[i]] for i in range(len(uclasses))]
@@ -87,13 +119,13 @@ class Plotter:
                 "label": 'w11',
                 "valmin": -10,
                 "valmax": 10,
-                "valinit": w[0][x],
+                "valinit": w[x][0],
             },
             {
                 "label": 'w12',
                 "valmin": -10,
                 "valmax": 10,
-                "valinit": w[0][y],
+                "valinit": w[y][0],
             },
             {
                 "label": 'b1',
