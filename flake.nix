@@ -20,7 +20,7 @@
           devShells = rec {
             main = pkgs.mkShell {
               packages = [
-                (python3.withPackages (ps: with ps; [
+                (python310.withPackages (ps: with ps; [
                     pandas
                     requests
                     pip
@@ -30,6 +30,8 @@
                     matplotlib
                     scipy
                     pygobject3
+                    tensorflow
+                    keras
                   ])
                 )
                 nodePackages.nodemon
